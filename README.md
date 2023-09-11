@@ -26,7 +26,112 @@ El aeropuerto de la Ciudad de México requiere una aplicación que muestre el in
 
 ## 3. Instalación y Uso
 
-_Instrucciones detalladas sobre cómo instalar y usar la aplicación, incluyendo cualquier dependencia necesaria._
+### Pre-requisitos
+
+Asegúrese de tener instalado Node.js y npm (o Yarn) en su sistema. Puede descargarlo desde [el sitio oficial de Node.js](https://nodejs.org/).
+
+### Instalación
+
+1. **Clonar el repositorio**:
+
+   ```bash
+   git clone https://github.com/MxDui/proyecto1-modelado.git
+   ```
+
+2. **Ir al directorio del proyecto**:
+
+   ```bash
+   cd proyecto1-modelado
+   ```
+
+3. **Instalar dependencias**:
+   Usando npm:
+
+   ```bash
+   npm install
+   ```
+
+   Usando Yarn:
+
+   ```bash
+   yarn install
+   ```
+
+4. **Iniciar la aplicación**:
+
+   - **Modo desarrollo**:
+
+     ```bash
+     npm run dev
+     ```
+
+     O si usa Yarn:
+
+     ```bash
+     yarn dev
+     ```
+
+   - **Modo producción**:
+     Primero, construya la aplicación:
+
+     ```bash
+     npm run build
+     ```
+
+     O si usa Yarn:
+
+     ```bash
+     yarn build
+     ```
+
+     Luego, inicie la aplicación:
+
+     ```bash
+     npm start
+     ```
+
+     O si usa Yarn:
+
+     ```bash
+     yarn start
+     ```
+
+La aplicación debería estar corriendo en [http://localhost:3000](http://localhost:3000).
+
+### Ejecución de Pruebas con Cypress
+
+1. **Iniciar Cypress en modo interactivo**:
+
+   Esto abrirá la interfaz de Cypress donde podrá seleccionar y ejecutar sus pruebas.
+
+   ```bash
+   npm run cypress:open
+   ```
+
+   O si usa Yarn:
+
+   ```bash
+   yarn cypress:open
+   ```
+
+2. **Ejecutar Cypress en modo headless**:
+
+   Esto ejecutará las pruebas en el fondo y le proporcionará un resumen en la terminal.
+
+   ```bash
+   npm run cypress:run
+   ```
+
+   O si usa Yarn:
+
+   ```bash
+   yarn cypress:run
+   ```
+
+### Notas
+
+- Asegúrese de que la aplicación esté corriendo cuando ejecute las pruebas con Cypress.
+- En caso de errores o problemas, consulte la documentación oficial de [Next.js](https://nextjs.org/docs) o [Cypress](https://www.cypress.io/documentation/).
 
 ## 4. Estructura del Proyecto
 
