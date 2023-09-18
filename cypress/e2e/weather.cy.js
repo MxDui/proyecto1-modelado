@@ -31,22 +31,30 @@ describe("Weather Page", () => {
     cy.get("div").contains("LONDON").should("be.visible");
     cy.get("div").contains("PARIS").should("be.visible");
   });
-
   it("should search by boleto", () => {
+    // Load the fixture data
+    cy.fixture("weather_fixture.json").as("fixtureData");
+
     // Select the "Boleto" option
     cy.get("select").select("boleto");
 
     // Type in the boleto (ticket code)
-    cy.get('input[placeholder="Código de Boleto"]').type("kw9f0kwvZJmsukQy");
+    const ticketCode = "kw9f0kwvZJmsukQy";
+    cy.get('input[placeholder="Código de Boleto"]').type(ticketCode);
 
-    // Mock the API response based on the decoded boleto cities
-    // Assuming the decodeBoleto function decodes "1234567890" to "Example Departure City from Ticket" and "Example Arrival City from Ticket"
-    cy.intercept(
-      "https://api.openweathermap.org/data/2.5/weather?q=Example Departure City from Ticket&appid=*"
-    ).as("getDepartureWeather");
-    cy.intercept(
-      "https://api.openweathermap.org/data/2.5/weather?q=Example Arrival City from Ticket&appid=*"
-    ).as("getArrivalWeather");
+    cy.get("@fixtureData").then((data) => {
+      // Find the matching ticket in the fixture data
+      const ticketInfo = data.find((item) => item.num_ticket === ticketCode);
+
+      // Mock the API response based on the fixture data
+      cy.intercept(
+        `https://api.openweathermap.org/data/2.5/weather?q=${ticketInfo.origin}&appid=*`
+      ).as("getDepartureWeather");
+
+      cy.intercept(
+        `https://api.openweathermap.org/data/2.5/weather?q=${ticketInfo.destination}&appid=*`
+      ).as("getArrivalWeather");
+    });
 
     // Click on the "Buscar" button
     cy.get("button").contains("Buscar").click();
@@ -57,10 +65,10 @@ describe("Weather Page", () => {
 
     cy.get("div").contains("Resultados").should("be.visible");
     cy.get("div")
-      .contains("EXAMPLE DEPARTURE CITY FROM TICKET")
+      .contains(ticketInfo.origin.toUpperCase())
       .should("be.visible");
     cy.get("div")
-      .contains("EXAMPLE ARRIVAL CITY FROM TICKET")
+      .contains(ticketInfo.destination.toUpperCase())
       .should("be.visible");
   });
 });
