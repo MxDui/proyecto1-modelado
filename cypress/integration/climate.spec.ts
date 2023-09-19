@@ -19,9 +19,9 @@ describe("Climate Class", () => {
       }
     ).as("getWeather");
 
-    // Call your Climate.getWeather() method directly
+    // Call your Weather service
     cy.window()
-      .invoke("Climate.getWeather", "London")
+      .invoke("Weather.getWeather", "London")
       .then((data: any) => {
         expect(data.main.temp).to.eq(280);
         expect(data.weather[0].description).to.eq("cloudy");
