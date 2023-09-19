@@ -6,17 +6,7 @@ import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
 import { motion } from "framer-motion";
-
-type WeatherData = {
-  departure: {
-    temperature: number | undefined;
-    status: string | undefined;
-  };
-  arrival: {
-    temperature: number | undefined;
-    status: string | undefined;
-  };
-};
+import { WeatherData } from "../types";
 
 export default function Home() {
   const [searchMode, setSearchMode] = React.useState("cities");
