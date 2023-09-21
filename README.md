@@ -137,7 +137,15 @@ La aplicación debería estar corriendo en [http://localhost:3000](http://localh
 
 La estructura del proyecto debe ser clara e intuitiva, pensando en un mantenimiento posterior a la entrega.
 
-_Descripción de la estructura de carpetas y archivos aquí._
+En el folder `app` se encuentran los archivos de la aplicación, mientras que en el folder `cypress` se encuentran los archivos de las pruebas.
+Dentro de `app` se encuentran los siguientes folders:
+`components`: contiene los componentes de la aplicación.
+`services`: contiene los servicios de la aplicación.
+Dentro de `cypress` se encuentran los siguientes folders:
+`fixtures`: contiene los archivos de datos para las pruebas.
+`integration`: contiene las pruebas de integración.
+`support`: contiene los archivos de configuración de Cypress.
+`e2e`: contiene las pruebas de extremo a extremo.
 
 ---
 
