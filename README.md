@@ -139,11 +139,52 @@ La estructura del proyecto debe ser clara e intuitiva, pensando en un mantenimie
 
 _Descripción de la estructura de carpetas y archivos aquí._
 
+---
+
 ## 5. Pruebas
 
-Se han implementado pruebas para garantizar el correcto funcionamiento de la aplicación. Cada sección cuenta con un mínimo de tres pruebas.
+Se han implementado pruebas para garantizar el correcto funcionamiento de las páginas principales de la aplicación. A continuación se presentan los detalles de estas pruebas.
 
-_Instrucciones sobre cómo ejecutar las pruebas aquí._
+### 5.1 Pruebas de la Página de Inicio
+
+La página de inicio presenta una ilustración y un botón para redirigir al usuario a la página de consulta del clima por ciudades o boleto.
+
+**Pruebas Implementadas**:
+
+1. **Carga de la Página de Inicio Correctamente**:
+   - Verifica que el título principal "Clima Aeropuerto" es visible.
+   - Al pasar el cursor sobre la ilustración, verifica las interacciones (por ejemplo, efecto de zoom).
+   - Verifica la visibilidad y funcionalidad del botón "Empezar".
+
+### 5.2 Pruebas de la Página de Clima
+
+En esta página, los usuarios pueden consultar el clima de sus ciudades de salida y llegada mediante el nombre de las ciudades o el código del boleto.
+
+**Pruebas Implementadas**:
+
+1. **Búsqueda por Ciudades**:
+
+   - Selecciona la opción "Ciudades" del selector.
+   - Introduce las ciudades de "Salida" y "Llegada".
+   - Verifica las llamadas a la API y los resultados mostrados para ambas ciudades.
+
+2. **Búsqueda por Boleto**:
+   - Selecciona la opción "Boleto" del selector.
+   - Introduce el código del boleto.
+   - Verifica las llamadas a la API basadas en las ciudades decodificadas del boleto y muestra los resultados.
+
+---
+
+**Instrucciones para ejecutar las pruebas**:
+
+Las pruebas se realizan utilizando Cypress. Para ejecutar estas pruebas, sigue los siguientes pasos:
+
+1. Asegúrate de tener Cypress instalado en tu proyecto. Si no lo tienes, puedes instalarlo usando `npm install cypress --save-dev`.
+2. Desde el directorio raíz de tu proyecto, abre el terminal y ejecuta `cypress open`.
+3. En la interfaz gráfica de Cypress que aparece, selecciona las pruebas que desees ejecutar (por ejemplo, "landing_page_spec.js" o "weather_page_spec.js").
+4. Cypress ejecutará las pruebas y mostrará los resultados en tiempo real.
+
+---
 
 ## 6. Contribuciones
 
