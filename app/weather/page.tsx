@@ -1,7 +1,6 @@
 "use client";
-
 import React from "react";
-import { QueryFunction, useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
 import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
@@ -12,44 +11,114 @@ export default function Home() {
   const [searchMode, setSearchMode] = React.useState("cities");
   const [boleto, setBoleto] = React.useState("");
 
-  const [weather, setWeather] = React.useState<WeatherData>({
-    departure: {
-      temperature: undefined,
-      status: undefined,
-    },
-    arrival: {
-      temperature: undefined,
-      status: undefined,
-    },
-  });
-
   const [searchedDepartureCity, setSearchedDepartureCity] = React.useState("");
   const [searchedArrivalCity, setSearchedArrivalCity] = React.useState("");
+  const [searchedDepartureCoords, setSearchedDepartureCoords] =
+    React.useState(null);
+  const [searchedArrivalCoords, setSearchedArrivalCoords] =
+    React.useState(null);
 
   const [departureCity, setDepartureCity] = React.useState("");
   const [arrivalCity, setArrivalCity] = React.useState("");
 
+  const { data: airportsData } = useQuery(
+    "airports",
+    async () => {
+      const response = await fetch("/airports.json");
+      return response.json();
+    },
+    {
+      staleTime: Infinity,
+    }
+  );
+
   const decodeBoleto = (ticketString: string) => {
-    // Add logic to decode the ticket and return the cities
+    const ticket = airportsData.find(
+      (ticket) => ticket.num_ticket === ticketString
+    );
+    if (!ticket)
+      return {
+        departureCoords: {},
+        arrivalCoords: {},
+        departureCity: "",
+        arrivalCity: "",
+      };
+
+    return {
+      departureCoords: {
+        lat: ticket.origin_latitude,
+        lon: ticket.origin_longitude,
+      },
+      arrivalCoords: {
+        lat: ticket.destination_latitude,
+        lon: ticket.destination_longitude,
+      },
+      departureCity: ticket.origin,
+      arrivalCity: ticket.destination,
+    };
   };
 
-  const fetchAndSetWeather = async (
-    city: string,
-    type: "departure" | "arrival"
-  ) => {
-    /* 
-        Add logic to fetch the weather for the city and set it in the weather state
-        - If the type is "departure", set the weather in the departure state
-        - If the type is "arrival", set the weather in the arrival state
-    */
+  const decodeMutation = useMutation(decodeBoleto);
+
+  const fetchWeather = async (city: string) => {
+    const weatherData = await Weather.getWeather(city);
+    return {
+      temperature: weatherData.main.temp,
+      status: weatherData.weather[0].main,
+    };
   };
+
+  const fetchWeatherByCoords = async (coords: { lat: number; lon: number }) => {
+    const weatherData = await Weather.getWeatherByCoords(
+      coords.lat,
+      coords.lon
+    );
+    return {
+      temperature: weatherData.main.temp,
+      status: weatherData.weather[0].main,
+    };
+  };
+
+  const departureWeatherQuery = useQuery(
+    [
+      "weather",
+      searchMode === "boleto" ? searchedDepartureCoords : searchedDepartureCity,
+    ],
+    () =>
+      searchMode === "boleto"
+        ? fetchWeatherByCoords(searchedDepartureCoords)
+        : fetchWeather(searchedDepartureCity),
+    { enabled: !!searchedDepartureCity || !!searchedDepartureCoords }
+  );
+
+  const arrivalWeatherQuery = useQuery(
+    [
+      "weather",
+      searchMode === "boleto" ? searchedArrivalCoords : searchedArrivalCity,
+    ],
+    () =>
+      searchMode === "boleto"
+        ? fetchWeatherByCoords(searchedArrivalCoords)
+        : fetchWeather(searchedArrivalCity),
+    { enabled: !!searchedArrivalCity || !!searchedArrivalCoords }
+  );
 
   const handleSearch = async () => {
-    /* 
-        Add logic to handle the search
-        - If the search mode is "boleto", decode the boleto and fetch the weather for the departure and arrival cities
-        - If the search mode is "cities", fetch the weather for the departure and arrival cities
-    */
+    if (searchMode === "boleto") {
+      const decodedInfo = await decodeMutation.mutateAsync(boleto);
+      setSearchedDepartureCity(decodedInfo.departureCity);
+      setSearchedArrivalCity(decodedInfo.arrivalCity);
+      setSearchedDepartureCoords(decodedInfo.departureCoords); // Set coords
+      setSearchedArrivalCoords(decodedInfo.arrivalCoords); // Set coords
+    } else {
+      setSearchedDepartureCity(departureCity);
+      setSearchedArrivalCity(arrivalCity);
+    }
+  };
+
+  const weather = {
+    departure: departureWeatherQuery.data,
+    arrival: arrivalWeatherQuery.data,
   };
 
   return (
@@ -60,8 +129,8 @@ export default function Home() {
       <div className="w-full max-w-2xl">
         <h2 className="text-2xl font-bold text-headline mb-2">Buscador</h2>
         <p className="text-paragraph mb-4 ">
-          Busca el clima de tu ciudad de salida y de llegada , ya sea para el
-          código de boleto o para la ciudades del vuelo.
+          Busca el clima de tu ciudad de salida y de llegada, ya sea para el
+          código de boleto o para las ciudades del vuelo.
         </p>
         <select
           className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
@@ -81,8 +150,8 @@ export default function Home() {
             <input
               className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
               placeholder="Código de Boleto"
-              value={boleto} // Use the boleto state here
-              onChange={(e) => setBoleto(e.target.value)} // Update the boleto state here
+              value={boleto}
+              onChange={(e) => setBoleto(e.target.value)}
             />
             <button
               className="bg-button text-button-text px-6 py-2 rounded w-full hover:bg-yellow-500 transition-all duration-200"

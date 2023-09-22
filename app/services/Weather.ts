@@ -1,5 +1,5 @@
 class Weather {
-  API_KEY = "";
+  API_KEY = "dbf5f10790f13c6f593d7e9e04f5b786";
   async getWeather(city: string) {
     try {
       const response = await fetch(
