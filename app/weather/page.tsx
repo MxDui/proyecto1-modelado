@@ -12,6 +12,16 @@ type Coordinates = {
   lon: number;
 };
 
+type Ticket = {
+  num_ticket: string;
+  origin: string;
+  destination: string;
+  origin_latitude: number;
+  origin_longitude: number;
+  destination_latitude: number;
+  destination_longitude: number;
+};
+
 type BoletoDecoded = {
   departureCoords: Coordinates;
   arrivalCoords: Coordinates;
@@ -46,8 +56,8 @@ export default function Home() {
 
   const decodeBoleto = (ticketString: string): Promise<BoletoDecoded> => {
     return new Promise((resolve, reject) => {
-      const ticket = airportsData.find(
-        (ticket) => ticket.num_ticket === ticketString
+      const ticket: Ticket | undefined = airportsData.find(
+        (t: Ticket) => t.num_ticket === ticketString
       );
 
       if (!ticket) {
