@@ -7,6 +7,18 @@ import Weather from "../services/Weather";
 import { motion } from "framer-motion";
 import { WeatherData } from "../types";
 
+type Coordinates = {
+  lat: number;
+  lon: number;
+};
+
+type BoletoDecoded = {
+  departureCoords: Coordinates;
+  arrivalCoords: Coordinates;
+  departureCity: string;
+  arrivalCity: string;
+};
+
 export default function Home() {
   const [searchMode, setSearchMode] = React.useState("cities");
   const [boleto, setBoleto] = React.useState("");
@@ -14,9 +26,9 @@ export default function Home() {
   const [searchedDepartureCity, setSearchedDepartureCity] = React.useState("");
   const [searchedArrivalCity, setSearchedArrivalCity] = React.useState("");
   const [searchedDepartureCoords, setSearchedDepartureCoords] =
-    React.useState(null);
+    React.useState<Coordinates | null>(null);
   const [searchedArrivalCoords, setSearchedArrivalCoords] =
-    React.useState(null);
+    React.useState<Coordinates | null>(null);
 
   const [departureCity, setDepartureCity] = React.useState("");
   const [arrivalCity, setArrivalCity] = React.useState("");
@@ -32,30 +44,30 @@ export default function Home() {
     }
   );
 
-  const decodeBoleto = (ticketString: string) => {
-    const ticket = airportsData.find(
-      (ticket) => ticket.num_ticket === ticketString
-    );
-    if (!ticket)
-      return {
-        departureCoords: {},
-        arrivalCoords: {},
-        departureCity: "",
-        arrivalCity: "",
-      };
+  const decodeBoleto = (ticketString: string): Promise<BoletoDecoded> => {
+    return new Promise((resolve, reject) => {
+      const ticket = airportsData.find(
+        (ticket) => ticket.num_ticket === ticketString
+      );
 
-    return {
-      departureCoords: {
-        lat: ticket.origin_latitude,
-        lon: ticket.origin_longitude,
-      },
-      arrivalCoords: {
-        lat: ticket.destination_latitude,
-        lon: ticket.destination_longitude,
-      },
-      departureCity: ticket.origin,
-      arrivalCity: ticket.destination,
-    };
+      if (!ticket) {
+        reject(new Error("Boleto not found"));
+        return;
+      }
+
+      resolve({
+        departureCoords: {
+          lat: ticket.origin_latitude,
+          lon: ticket.origin_longitude,
+        },
+        arrivalCoords: {
+          lat: ticket.destination_latitude,
+          lon: ticket.destination_longitude,
+        },
+        departureCity: ticket.origin,
+        arrivalCity: ticket.destination,
+      });
+    });
   };
 
   const decodeMutation = useMutation(decodeBoleto);
@@ -68,7 +80,7 @@ export default function Home() {
     };
   };
 
-  const fetchWeatherByCoords = async (coords: { lat: number; lon: number }) => {
+  const fetchWeatherByCoords = async (coords: Coordinates) => {
     const weatherData = await Weather.getWeatherByCoords(
       coords.lat,
       coords.lon
@@ -86,7 +98,7 @@ export default function Home() {
     ],
     () =>
       searchMode === "boleto"
-        ? fetchWeatherByCoords(searchedDepartureCoords)
+        ? fetchWeatherByCoords(searchedDepartureCoords as Coordinates)
         : fetchWeather(searchedDepartureCity),
     { enabled: !!searchedDepartureCity || !!searchedDepartureCoords }
   );
@@ -98,7 +110,7 @@ export default function Home() {
     ],
     () =>
       searchMode === "boleto"
-        ? fetchWeatherByCoords(searchedArrivalCoords)
+        ? fetchWeatherByCoords(searchedArrivalCoords as Coordinates)
         : fetchWeather(searchedArrivalCity),
     { enabled: !!searchedArrivalCity || !!searchedArrivalCoords }
   );
@@ -108,11 +120,13 @@ export default function Home() {
       const decodedInfo = await decodeMutation.mutateAsync(boleto);
       setSearchedDepartureCity(decodedInfo.departureCity);
       setSearchedArrivalCity(decodedInfo.arrivalCity);
-      setSearchedDepartureCoords(decodedInfo.departureCoords); // Set coords
-      setSearchedArrivalCoords(decodedInfo.arrivalCoords); // Set coords
+      setSearchedDepartureCoords(decodedInfo.departureCoords);
+      setSearchedArrivalCoords(decodedInfo.arrivalCoords);
     } else {
       setSearchedDepartureCity(departureCity);
       setSearchedArrivalCity(arrivalCity);
+      setSearchedDepartureCoords(null);
+      setSearchedArrivalCoords(null);
     }
   };
 
@@ -135,7 +149,14 @@ export default function Home() {
         <select
           className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
           value={searchMode}
-          onChange={(e) => setSearchMode(e.target.value)}
+          onChange={(e) => {
+            setSearchMode(e.target.value);
+            setBoleto("");
+            setSearchedDepartureCity("");
+            setSearchedArrivalCity("");
+            setSearchedDepartureCoords(null);
+            setSearchedArrivalCoords(null);
+          }}
         >
           <option value="boleto">Boleto</option>
           <option value="cities">Ciudades</option>
