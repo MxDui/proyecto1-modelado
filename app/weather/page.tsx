@@ -4,22 +4,35 @@ import { useQuery, useMutation } from "react-query";
 import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
-import { motion } from "framer-motion";
 import { BoletoDecoded, Coordinates, Ticket } from "../types";
+import levenshtein from "fast-levenshtein";
+
+type WeatherData = {
+  temperature: number;
+  status: string;
+};
 
 export default function Home() {
-  const [searchMode, setSearchMode] = React.useState("cities");
-  const [boleto, setBoleto] = React.useState("");
+  const [searchMode, setSearchMode] = React.useState<string>("cities");
+  const [boleto, setBoleto] = React.useState<string>("");
 
-  const [searchedDepartureCity, setSearchedDepartureCity] = React.useState("");
-  const [searchedArrivalCity, setSearchedArrivalCity] = React.useState("");
+  const [searchedDepartureCity, setSearchedDepartureCity] =
+    React.useState<string>("");
+  const [searchedArrivalCity, setSearchedArrivalCity] =
+    React.useState<string>("");
   const [searchedDepartureCoords, setSearchedDepartureCoords] =
     React.useState<Coordinates | null>(null);
   const [searchedArrivalCoords, setSearchedArrivalCoords] =
     React.useState<Coordinates | null>(null);
 
-  const [departureCity, setDepartureCity] = React.useState("");
-  const [arrivalCity, setArrivalCity] = React.useState("");
+  const [departureCity, setDepartureCity] = React.useState<string>("");
+  const [arrivalCity, setArrivalCity] = React.useState<string>("");
+
+  const [departureCitySuggestions, setDepartureCitySuggestions] =
+    React.useState<string[]>([]);
+  const [arrivalCitySuggestions, setArrivalCitySuggestions] = React.useState<
+    string[]
+  >([]);
 
   const { data: airportsData } = useQuery(
     "airports",
@@ -27,10 +40,56 @@ export default function Home() {
       const response = await fetch("/airports.json");
       return response.json();
     },
-    {
-      staleTime: Infinity,
-    }
+    { staleTime: Infinity }
   );
+
+  const { data: cityNamesData = [] } = useQuery(
+    "cityNames",
+    async () => {
+      const response = await fetch("/sorted_city_names.json");
+      return response.json();
+    },
+    { staleTime: Infinity }
+  );
+
+  const binarySearch = (cityNames: string[], target: string) => {
+    let low = 0;
+    let high = cityNames.length - 1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const midVal = cityNames[mid].toLowerCase();
+
+      if (midVal < target.toLowerCase()) {
+        low = mid + 1;
+      } else if (midVal > target.toLowerCase()) {
+        high = mid - 1;
+      } else {
+        return mid;
+      }
+    }
+    return low;
+  };
+
+  const getCitySuggestions = (
+    inputCity: string,
+    cityNames: string[],
+    maxDistanceCheck = 5
+  ) => {
+    const index = binarySearch(cityNames, inputCity);
+    let suggestions = [cityNames[index]];
+
+    for (let i = 1; i < maxDistanceCheck; i++) {
+      if (index - i >= 0) {
+        suggestions.push(cityNames[index - i]);
+      }
+      if (index + i < cityNames.length) {
+        suggestions.push(cityNames[index + i]);
+      }
+    }
+
+    return suggestions;
+  };
 
   const decodeBoleto = (ticketString: string): Promise<BoletoDecoded> => {
     return new Promise((resolve, reject) => {
@@ -60,7 +119,7 @@ export default function Home() {
 
   const decodeMutation = useMutation(decodeBoleto);
 
-  const fetchWeather = async (city: string) => {
+  const fetchWeather = async (city: string): Promise<WeatherData> => {
     const weatherData = await Weather.getWeather(city);
     return {
       temperature: weatherData.main.temp,
@@ -68,7 +127,9 @@ export default function Home() {
     };
   };
 
-  const fetchWeatherByCoords = async (coords: Coordinates) => {
+  const fetchWeatherByCoords = async (
+    coords: Coordinates
+  ): Promise<WeatherData> => {
     const weatherData = await Weather.getWeatherByCoords(
       coords.lat,
       coords.lon
@@ -103,6 +164,16 @@ export default function Home() {
     { enabled: !!searchedArrivalCity || !!searchedArrivalCoords }
   );
 
+  React.useEffect(() => {
+    const suggestions = getCitySuggestions(departureCity, cityNamesData);
+    setDepartureCitySuggestions(suggestions);
+  }, [departureCity, cityNamesData]);
+
+  React.useEffect(() => {
+    const suggestions = getCitySuggestions(arrivalCity, cityNamesData);
+    setArrivalCitySuggestions(suggestions);
+  }, [arrivalCity, cityNamesData]);
+
   const handleSearch = async () => {
     if (searchMode === "boleto") {
       const decodedInfo = await decodeMutation.mutateAsync(boleto);
@@ -113,8 +184,19 @@ export default function Home() {
     } else {
       setSearchedDepartureCity(departureCity);
       setSearchedArrivalCity(arrivalCity);
-      setSearchedDepartureCoords(null);
-      setSearchedArrivalCoords(null);
+    }
+  };
+
+  const selectSuggestedCity = (
+    suggestedCity: string,
+    type: "departure" | "arrival"
+  ) => {
+    if (type === "departure") {
+      setDepartureCity(suggestedCity);
+      setDepartureCitySuggestions([]);
+    } else {
+      setArrivalCity(suggestedCity);
+      setArrivalCitySuggestions([]);
     }
   };
 
@@ -130,7 +212,7 @@ export default function Home() {
       </h1>
       <div className="w-full max-w-2xl">
         <h2 className="text-2xl font-bold text-headline mb-2">Buscador</h2>
-        <p className="text-paragraph mb-4 ">
+        <p className="text-paragraph mb-4">
           Busca el clima de tu ciudad de salida y de llegada, ya sea para el
           código de boleto o para las ciudades del vuelo.
         </p>
@@ -140,6 +222,8 @@ export default function Home() {
           onChange={(e) => {
             setSearchMode(e.target.value);
             setBoleto("");
+            setDepartureCity("");
+            setArrivalCity("");
             setSearchedDepartureCity("");
             setSearchedArrivalCity("");
             setSearchedDepartureCoords(null);
@@ -149,13 +233,8 @@ export default function Home() {
           <option value="boleto">Boleto</option>
           <option value="cities">Ciudades</option>
         </select>
-
         {searchMode === "boleto" ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full grid grid-cols-2 gap-4 my-5"
-          >
+          <div className="w-full grid grid-cols-2 gap-4 my-5">
             <input
               className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
               placeholder="Código de Boleto"
@@ -168,17 +247,19 @@ export default function Home() {
             >
               Buscar
             </button>
-          </motion.div>
+          </div>
         ) : (
           <InputComponent
-            handleSearch={handleSearch}
             departureCity={departureCity}
             setDepartureCity={setDepartureCity}
             arrivalCity={arrivalCity}
             setArrivalCity={setArrivalCity}
+            handleSearch={handleSearch}
+            departureCitySuggestions={departureCitySuggestions}
+            arrivalCitySuggestions={arrivalCitySuggestions}
+            selectSuggestedCity={selectSuggestedCity}
           />
         )}
-
         {weather && (
           <ResultComponent
             departureCity={searchedDepartureCity.toUpperCase()}
