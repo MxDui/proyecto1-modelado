@@ -5,7 +5,6 @@ import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
 import { BoletoDecoded, Coordinates, Ticket } from "../types";
-import levenshtein from "fast-levenshtein";
 
 type WeatherData = {
   temperature: number;
