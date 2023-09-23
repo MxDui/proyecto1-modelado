@@ -1,9 +1,14 @@
 # Proyecto 01: Web Service para Consulta de Clima en Aeropuertos
 
-**Universidad Nacional Autónoma de México**  
-**Facultad de Ciencias**  
-**Modelado y Programación**  
-**Fecha:** 29 de Agosto de 2023
+*Universidad Nacional Autónoma de México*  
+*Facultad de Ciencias*  
+*Modelado y Programación*  
+*Fecha:* 29 de Agosto de 2023
+
+## Integrantes
+
+- *David Rivera Morales* - 320176876
+- *Jorge Eduardo García Serrano* - 320180918
 
 ## 1. Introducción
 
@@ -13,9 +18,9 @@ Hoy en día, grandes sitios web como Facebook, Google y Microsoft hacen uso de s
 
 El aeropuerto de la Ciudad de México requiere una aplicación que muestre el informe del clima de la ciudad de salida y la ciudad de llegada para tickets que salen el mismo día. La aplicación debe ser:
 
-- **Interactiva:** fácil de usar para sobrecargos, pilotos y clientes promedio.
-- **Intuitiva:** la interfaz debe ser clara y sencilla.
-- **Amigable:** solo se mostrará la información relevante del clima.
+- *Interactiva:* fácil de usar para sobrecargos, pilotos y clientes promedio.
+- *Intuitiva:* la interfaz debe ser clara y sencilla.
+- *Amigable:* solo se mostrará la información relevante del clima.
 
 ### Características Principales:
 
@@ -41,101 +46,74 @@ Asegúrese de tener instalado Node.js y npm (o Yarn) en su sistema. Puede descar
 
 ### Instalación
 
-1. **Clonar el repositorio**:
+1. *Clonar el repositorio*:
 
-   ```bash
+   bash
    git clone https://github.com/MxDui/proyecto1-modelado.git
-   ```
+   
 
-2. **Ir al directorio del proyecto**:
+2. *Ir al directorio del proyecto*:
 
-   ```bash
+   bash
    cd proyecto1-modelado
-   ```
+   
 
-3. **Instalar dependencias**:
+3. *Instalar dependencias*:
    Usando npm:
 
-   ```bash
+   bash
    npm install
-   ```
+   
 
    Usando Yarn:
 
-   ```bash
+   bash
    yarn install
-   ```
+   
 
-4. **Iniciar la aplicación**:
+4. *Iniciar la aplicación*:
 
-   - **Modo desarrollo**:
+   bash
+   npm run dev
+   
 
-     ```bash
-     npm run dev
-     ```
+   O si usa Yarn:
 
-     O si usa Yarn:
-
-     ```bash
-     yarn dev
-     ```
-
-   - **Modo producción**:
-     Primero, construya la aplicación:
-
-     ```bash
-     npm run build
-     ```
-
-     O si usa Yarn:
-
-     ```bash
-     yarn build
-     ```
-
-     Luego, inicie la aplicación:
-
-     ```bash
-     npm start
-     ```
-
-     O si usa Yarn:
-
-     ```bash
-     yarn start
-     ```
+   bash
+   yarn dev
+   
 
 La aplicación debería estar corriendo en [http://localhost:3000](http://localhost:3000).
 
 ### Ejecución de Pruebas con Cypress
 
-1. **Iniciar Cypress en modo interactivo**:
+1. *Iniciar Cypress en modo interactivo*:
 
    Esto abrirá la interfaz de Cypress donde podrá seleccionar y ejecutar sus pruebas.
 
-   ```bash
+   bash
    npm run cypress:open
-   ```
+   
 
    O si usa Yarn:
 
-   ```bash
+   bash
    yarn cypress:open
-   ```
+   
 
-2. **Ejecutar Cypress en modo headless**:
+2. *Ejecutar Cypress en modo headless*:
 
    Esto ejecutará las pruebas en el fondo y le proporcionará un resumen en la terminal.
 
-   ```bash
+   bash
    npm run cypress:run
-   ```
+   
 
    O si usa Yarn:
 
-   ```bash
+   bash
    yarn cypress:run
-   ```
+   
 
 ### Notas
 
@@ -166,9 +144,9 @@ Se han implementado pruebas para garantizar el correcto funcionamiento de las p�
 
 La página de inicio presenta una ilustración y un botón para redirigir al usuario a la página de consulta del clima por ciudades o boleto.
 
-**Pruebas Implementadas**:
+*Pruebas Implementadas*:
 
-1. **Carga de la Página de Inicio Correctamente**:
+1. *Carga de la Página de Inicio Correctamente*:
    - Verifica que el título principal "Clima Aeropuerto" es visible.
    - Al pasar el cursor sobre la ilustración, verifica las interacciones (por ejemplo, efecto de zoom).
    - Verifica la visibilidad y funcionalidad del botón "Empezar".
@@ -177,22 +155,22 @@ La página de inicio presenta una ilustración y un botón para redirigir al usu
 
 En esta página, los usuarios pueden consultar el clima de sus ciudades de salida y llegada mediante el nombre de las ciudades o el código del boleto.
 
-**Pruebas Implementadas**:
+*Pruebas Implementadas*:
 
-1. **Búsqueda por Ciudades**:
+1. *Búsqueda por Ciudades*:
 
    - Selecciona la opción "Ciudades" del selector.
    - Introduce las ciudades de "Salida" y "Llegada".
    - Verifica las llamadas a la API y los resultados mostrados para ambas ciudades.
 
-2. **Búsqueda por Boleto**:
+2. *Búsqueda por Boleto*:
    - Selecciona la opción "Boleto" del selector.
    - Introduce el código del boleto.
    - Verifica las llamadas a la API basadas en las ciudades decodificadas del boleto y muestra los resultados.
 
 ---
 
-**Instrucciones para ejecutar las pruebas**:
+*Instrucciones para ejecutar las pruebas*:
 
 Las pruebas se realizan utilizando Cypress. Para ejecutar estas pruebas, sigue los siguientes pasos:
 
