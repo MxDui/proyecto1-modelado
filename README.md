@@ -71,7 +71,10 @@ Asegúrese de tener instalado Node.js y npm (o Yarn) en su sistema. Puede descar
    yarn install
    ```
 
-4. **Iniciar la aplicación**:
+4. **Sustituye la API Key**:
+   En el archivo `.env`, sustituye el valor de la variable `NEXT_PUBLIC_OPENWEATHERMAP_API_KEY` con tu API Key de OpenWeatherMap.
+
+5. **Iniciar la aplicación**:
 
    ```bash
    npm run dev
