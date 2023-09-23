@@ -39,15 +39,7 @@ export default function Home() {
             salida y llegada para tus vuelos. Esto te ayudará a estar preparado
             para cualquier condición climática.
           </p>
-          <p className="text-paragraph text-lg mb-8">
-            ¿Quieres saber más sobre cómo funciona?
-            <a
-              href="#"
-              className="text-blue-600 hover:text-blue-600 ml-1 underline"
-            >
-              Lee nuestra documentación
-            </a>
-          </p>
+
           <button
             onClick={() => (window.location.href = "/weather")}
             className="bg-button text-button-text px-8 py-3 text-lg rounded-full hover:bg-yellow-500 transition-all duration-200 shadow-md"
