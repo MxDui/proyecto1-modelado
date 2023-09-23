@@ -1,8 +1,9 @@
 class Weather {
+  API_KEY = "";
   async getWeather(city: string) {
     try {
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${this.API_KEY}`
       );
 
       if (!response.ok) {
@@ -21,7 +22,7 @@ class Weather {
   async getWeatherByCoords(lat: number, lon: number) {
     try {
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${this.API_KEY}`
       );
 
       if (!response.ok) {
