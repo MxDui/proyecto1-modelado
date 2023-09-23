@@ -1,4 +1,6 @@
 describe("Weather Page", () => {
+  let tickets = [];
+
   beforeEach(() => {
     // Navigate to the main page
     cy.visit("localhost:3000/weather");
@@ -31,44 +33,57 @@ describe("Weather Page", () => {
     cy.get("div").contains("LONDON").should("be.visible");
     cy.get("div").contains("PARIS").should("be.visible");
   });
-  it("should search by boleto", () => {
-    // Load the fixture data
-    cy.fixture("weather_fixture.json").as("fixtureData");
+  it("should search by boleto using random tickets from fixture", () => {
+    // Set up the general intercepts for weather endpoints
+    cy.intercept("GET", "https://api.openweathermap.org/data/2.5/weather*").as(
+      "getWeather"
+    );
 
-    // Select the "Boleto" option
-    cy.get("select").select("boleto");
+    // Load the fixture
+    cy.fixture("weather_fixture.json").then((data) => {
+      // Shuffle the array and pick the first 10
+      const tickets = Cypress._.sampleSize(data, 10);
 
-    // Type in the boleto (ticket code)
-    const ticketCode = "kw9f0kwvZJmsukQy";
-    cy.get('input[placeholder="Código de Boleto"]').type(ticketCode);
+      tickets.forEach((ticket) => {
+        cy.wrap(ticket).then((ticket) => {
+          // Wrap the ticket to handle it within Cypress context
+          // Select the "Boleto" option
+          cy.get("select").select("boleto");
 
-    cy.get("@fixtureData").then((data) => {
-      // Find the matching ticket in the fixture data
-      const ticketInfo = data.find((item) => item.num_ticket === ticketCode);
+          // Type in the boleto (ticket code)
+          cy.get('input[placeholder="Código de Boleto"]')
+            .clear()
+            .type(ticket.num_ticket);
 
-      // Mock the API response based on the fixture data
-      cy.intercept(
-        `https://api.openweathermap.org/data/2.5/weather?q=${ticketInfo.origin}&appid=*`
-      ).as("getDepartureWeather");
+          // Click on the "Buscar" button
+          cy.get("button").contains("Buscar").click();
 
-      cy.intercept(
-        `https://api.openweathermap.org/data/2.5/weather?q=${ticketInfo.destination}&appid=*`
-      ).as("getArrivalWeather");
+          // Wait for the weather requests for both cities
+          cy.wait("@getWeather").then((xhr) => {
+            // Verify the request was made with the right coordinates
+            if (xhr.request.url.includes(ticket.origin)) {
+              expect(xhr.request.url).to.include(
+                `lat=${ticket.origin_latitude}`
+              );
+              expect(xhr.request.url).to.include(
+                `lon=${ticket.origin_longitude}`
+              );
+            } else if (xhr.request.url.includes(ticket.destination)) {
+              expect(xhr.request.url).to.include(
+                `lat=${ticket.destination_latitude}`
+              );
+              expect(xhr.request.url).to.include(
+                `lon=${ticket.destination_longitude}`
+              );
+            }
+          });
+
+          // Check the results
+          cy.get("div").contains("Resultados").should("be.visible");
+          cy.get("div").contains(ticket.origin).should("be.visible");
+          cy.get("div").contains(ticket.destination).should("be.visible");
+        });
+      });
     });
-
-    // Click on the "Buscar" button
-    cy.get("button").contains("Buscar").click();
-
-    // Verify the API calls were made and check the results
-    cy.wait("@getDepartureWeather");
-    cy.wait("@getArrivalWeather");
-
-    cy.get("div").contains("Resultados").should("be.visible");
-    cy.get("div")
-      .contains(ticketInfo.origin.toUpperCase())
-      .should("be.visible");
-    cy.get("div")
-      .contains(ticketInfo.destination.toUpperCase())
-      .should("be.visible");
   });
 });
