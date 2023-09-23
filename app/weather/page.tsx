@@ -1,6 +1,11 @@
 "use client";
 import React from "react";
-import { useQuery, useMutation } from "react-query";
+import {
+  useQuery,
+  useMutation,
+  UseMutationResult,
+  UseQueryResult,
+} from "react-query";
 import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
@@ -14,6 +19,7 @@ type WeatherData = {
 export default function Home() {
   const [searchMode, setSearchMode] = React.useState<string>("cities");
   const [boleto, setBoleto] = React.useState<string>("");
+  const [alertMessage, setAlertMessage] = React.useState<string | null>(null);
 
   const [searchedDepartureCity, setSearchedDepartureCity] =
     React.useState<string>("");
@@ -116,7 +122,12 @@ export default function Home() {
     });
   };
 
-  const decodeMutation = useMutation(decodeBoleto);
+  const decodeMutation: UseMutationResult<
+    BoletoDecoded,
+    Error,
+    string,
+    unknown
+  > = useMutation(decodeBoleto);
 
   const fetchWeather = async (city: string): Promise<WeatherData> => {
     const weatherData = await Weather.getWeather(city);
@@ -139,7 +150,7 @@ export default function Home() {
     };
   };
 
-  const departureWeatherQuery = useQuery(
+  const departureWeatherQuery: UseQueryResult<WeatherData, Error> = useQuery(
     [
       "weather",
       searchMode === "boleto" ? searchedDepartureCoords : searchedDepartureCity,
@@ -150,8 +161,7 @@ export default function Home() {
         : fetchWeather(searchedDepartureCity),
     { enabled: !!searchedDepartureCity || !!searchedDepartureCoords }
   );
-
-  const arrivalWeatherQuery = useQuery(
+  const arrivalWeatherQuery: UseQueryResult<WeatherData, Error> = useQuery(
     [
       "weather",
       searchMode === "boleto" ? searchedArrivalCoords : searchedArrivalCity,
@@ -162,6 +172,28 @@ export default function Home() {
         : fetchWeather(searchedArrivalCity),
     { enabled: !!searchedArrivalCity || !!searchedArrivalCoords }
   );
+
+  React.useEffect(() => {
+    if (decodeMutation.isError) {
+      setAlertMessage("Error decoding boleto. Please try again.");
+    } else if (departureWeatherQuery.isError) {
+      setAlertMessage(
+        "Error fetching departure city weather. Please try again."
+      );
+    } else if (arrivalWeatherQuery.isError) {
+      setAlertMessage("Error fetching arrival city weather. Please try again.");
+    }
+
+    const timeoutId = setTimeout(() => {
+      setAlertMessage(null);
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    decodeMutation.isError,
+    departureWeatherQuery.isError,
+    arrivalWeatherQuery.isError,
+  ]);
 
   React.useEffect(() => {
     const suggestions = getCitySuggestions(departureCity, cityNamesData);
@@ -206,6 +238,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-10">
+      {alertMessage && (
+        <div className="w-full max-w-2xl mb-4 bg-red-500 text-white p-4 rounded">
+          {alertMessage}
+        </div>
+      )}
       <h1 className="text-4xl font-bold text-headline mb-10">
         Clima Aeropuerto
       </h1>
