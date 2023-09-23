@@ -5,29 +5,7 @@ import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
 import { motion } from "framer-motion";
-import { WeatherData } from "../types";
-
-type Coordinates = {
-  lat: number;
-  lon: number;
-};
-
-type Ticket = {
-  num_ticket: string;
-  origin: string;
-  destination: string;
-  origin_latitude: number;
-  origin_longitude: number;
-  destination_latitude: number;
-  destination_longitude: number;
-};
-
-type BoletoDecoded = {
-  departureCoords: Coordinates;
-  arrivalCoords: Coordinates;
-  departureCity: string;
-  arrivalCity: string;
-};
+import { BoletoDecoded, Coordinates, Ticket } from "../types";
 
 export default function Home() {
   const [searchMode, setSearchMode] = React.useState("cities");
