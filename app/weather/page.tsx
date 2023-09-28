@@ -202,12 +202,15 @@ export default function Home() {
       "weather",
       searchMode === "boleto" ? searchedDepartureCoords : searchedDepartureCity,
     ],
-    () =>
-      searchMode === "boleto"
-        ? fetchWeatherByCoords(searchedDepartureCoords as Coordinates)
-        : fetchWeather(searchedDepartureCity),
+    () => {
+      if (searchMode === "boleto" || searchMode === "iata") {
+        return fetchWeatherByCoords(searchedDepartureCoords as Coordinates);
+      }
+      return fetchWeather(searchedDepartureCity);
+    },
     { enabled: !!searchedDepartureCity || !!searchedDepartureCoords }
   );
+
   const arrivalWeatherQuery: UseQueryResult<WeatherData, Error> = useQuery(
     [
       "weather",
@@ -265,14 +268,14 @@ export default function Home() {
       }
     } else if (searchMode === "iata") {
       const iataInfo = iataCodesData.find(
-        (codeInfo) => codeInfo.iata_code === iataCode
+        (codeInfo: any) => codeInfo.iata_code === iataCode
       );
       if (iataInfo) {
-        setSearchedDepartureCity(iataInfo.iata_code); // You might need to map this to a city name if you have the mapping
         setSearchedDepartureCoords({
           lat: iataInfo.latitude_deg,
           lon: iataInfo.longitude_deg,
         });
+        setSearchedDepartureCity(iataCode);
       }
     } else {
       setSearchedDepartureCity(departureCity);
@@ -325,7 +328,7 @@ export default function Home() {
         >
           <option value="boleto">Boleto</option>
           <option value="cities">Ciudades</option>
-          <option value="iata">IATA Code</option>
+          <option value="iata">IATA</option>
         </select>
         {searchMode === "boleto" ? (
           <div className="w-full grid grid-cols-2 gap-4 my-5">
@@ -346,7 +349,7 @@ export default function Home() {
           <div className="w-full grid grid-cols-2 gap-4 my-5">
             <input
               className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
-              placeholder="IATA Code"
+              placeholder="IATA"
               value={iataCode}
               onChange={(e) => setIataCode(e.target.value)}
             />
