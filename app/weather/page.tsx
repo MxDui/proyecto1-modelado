@@ -14,6 +14,11 @@ import { BoletoDecoded, Coordinates, Ticket } from "../types";
 type WeatherData = {
   temperature: number;
   status: string;
+  pressure: number;
+  humidity: number;
+  sea_level: number;
+  grnd_level: number;
+  icon: string;
 };
 
 export default function Home() {
@@ -136,6 +141,11 @@ export default function Home() {
         2
       ) as any,
       status: weatherData.weather[0].main,
+      pressure: weatherData.main.pressure,
+      humidity: weatherData.main.humidity,
+      sea_level: weatherData.main.sea_level,
+      grnd_level: weatherData.main.grnd_level,
+      icon: weatherData.weather[0].icon,
     };
   };
 
@@ -151,6 +161,11 @@ export default function Home() {
         2
       ) as any,
       status: weatherData.weather[0].main,
+      pressure: weatherData.main.pressure,
+      humidity: weatherData.main.humidity,
+      sea_level: weatherData.main.sea_level,
+      grnd_level: weatherData.main.grnd_level,
+      icon: weatherData.weather[0].icon,
     };
   };
 
