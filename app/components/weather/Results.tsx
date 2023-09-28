@@ -21,6 +21,7 @@ interface ResultProps {
 }
 
 export const ResultComponent: React.FC<ResultProps> = ({
+  city,
   departureCity,
   arrivalCity,
   weather,
@@ -30,7 +31,6 @@ export const ResultComponent: React.FC<ResultProps> = ({
   return (
     <div className="text-paragraph mt-5 w-full p-5 rounded-md bg-white shadow-md font-medium">
       <h2 className="text-headline text-2xl mb-3">Resultados</h2>
-
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
