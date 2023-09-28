@@ -2,7 +2,7 @@
 const nextConfig = {
   // add image domain
   images: {
-    domains: ["vuela.aeromexico.com"],
+    domains: ["vuela.aeromexico.com", "openweathermap.org"],
   },
 };
 
