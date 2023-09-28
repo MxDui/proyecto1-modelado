@@ -21,7 +21,6 @@ interface ResultProps {
 }
 
 export const ResultComponent: React.FC<ResultProps> = ({
-  city,
   departureCity,
   arrivalCity,
   weather,
