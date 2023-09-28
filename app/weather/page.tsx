@@ -132,7 +132,9 @@ export default function Home() {
   const fetchWeather = async (city: string): Promise<WeatherData> => {
     const weatherData = await Weather.getWeather(city);
     return {
-      temperature: weatherData.main.temp,
+      temperature: (parseFloat(weatherData.main.temp) - 273.15).toFixed(
+        2
+      ) as any,
       status: weatherData.weather[0].main,
     };
   };
@@ -145,7 +147,9 @@ export default function Home() {
       coords.lon
     );
     return {
-      temperature: weatherData.main.temp,
+      temperature: (parseFloat(weatherData.main.temp) - 273.15).toFixed(
+        2
+      ) as any,
       status: weatherData.weather[0].main,
     };
   };
@@ -207,27 +211,25 @@ export default function Home() {
 
   const handleSearch = async () => {
     if (searchMode === "boleto") {
-      const decodedInfo = await decodeMutation.mutateAsync(boleto);
-      setSearchedDepartureCity(decodedInfo.departureCity);
-      setSearchedArrivalCity(decodedInfo.arrivalCity);
-      setSearchedDepartureCoords(decodedInfo.departureCoords);
-      setSearchedArrivalCoords(decodedInfo.arrivalCoords);
+      try {
+        const decodedInfo = await decodeMutation.mutateAsync(boleto);
+        setSearchedDepartureCity(decodedInfo.departureCity);
+        setSearchedArrivalCity(decodedInfo.arrivalCity);
+        setSearchedDepartureCoords(decodedInfo.departureCoords);
+        setSearchedArrivalCoords(decodedInfo.arrivalCoords);
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       setSearchedDepartureCity(departureCity);
-      setSearchedArrivalCity(arrivalCity);
     }
   };
 
-  const selectSuggestedCity = (
-    suggestedCity: string,
-    type: "departure" | "arrival"
-  ) => {
-    if (type === "departure") {
-      setDepartureCity(suggestedCity);
-      setDepartureCitySuggestions([]);
+  const selectSuggestedCity = (suggestion: string) => {
+    if (searchMode === "boleto") {
+      setSearchedDepartureCity(suggestion);
     } else {
-      setArrivalCity(suggestedCity);
-      setArrivalCitySuggestions([]);
+      setDepartureCity(suggestion);
     }
   };
 
@@ -286,13 +288,10 @@ export default function Home() {
           </div>
         ) : (
           <InputComponent
-            departureCity={departureCity}
-            setDepartureCity={setDepartureCity}
-            arrivalCity={arrivalCity}
-            setArrivalCity={setArrivalCity}
+            city={departureCity}
+            setCity={setDepartureCity}
             handleSearch={handleSearch}
-            departureCitySuggestions={departureCitySuggestions}
-            arrivalCitySuggestions={arrivalCitySuggestions}
+            citySuggestions={departureCitySuggestions}
             selectSuggestedCity={selectSuggestedCity}
           />
         )}
@@ -300,7 +299,8 @@ export default function Home() {
           <ResultComponent
             departureCity={searchedDepartureCity.toUpperCase()}
             arrivalCity={searchedArrivalCity.toUpperCase()}
-            weather={weather}
+            departureWeather={departureWeatherQuery.data}
+            arrivalWeather={arrivalWeatherQuery.data}
           />
         )}
       </div>
