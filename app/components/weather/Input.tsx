@@ -65,7 +65,6 @@ export const InputComponent = ({
           </div>
         )}
       </div>
-
       <button
         className="bg-button text-button-text px-6 py-2 rounded w-full hover:bg-yellow-500 transition-all duration-200"
         onClick={() => {
