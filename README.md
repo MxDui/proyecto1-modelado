@@ -32,7 +32,7 @@ El aeropuerto de la Ciudad de México requiere una aplicación que muestre el in
 ### 2.1 Descripción del algortimo para la consulta del clima
 
 1. El usuario selecciona la opción de búsqueda por ciudades o boleto.
-2. El usuario ingresa las ciudades de salida y llegada o el código del boleto.
+2. El usuario ingresa la ciudad, el IATA o el código del boleto.
 3. El sistema valida la entrada del usuario y muestra un mensaje de error en caso de ser necesario.
 4. El sistema realiza una consulta al web service para obtener el clima de las ciudades de salida y llegada donde estas se guardan en un cache.
 5. El sistema muestra el clima de las ciudades de salida y llegada pero si hay un error en la consulta, se muestra un mensaje de error.
@@ -166,13 +166,19 @@ En esta página, los usuarios pueden consultar el clima de sus ciudades de salid
 1. **Búsqueda por Ciudades**:
 
    - Selecciona la opción "Ciudades" del selector.
-   - Introduce las ciudades de "Salida" y "Llegada".
+   - Introduce las ciudad.
    - Verifica las llamadas a la API y los resultados mostrados para ambas ciudades.
 
 2. **Búsqueda por Boleto**:
+
    - Selecciona la opción "Boleto" del selector.
    - Introduce el código del boleto.
    - Verifica las llamadas a la API basadas en las ciudades decodificadas del boleto y muestra los resultados.
+
+3. **Búsqueda por IATA**:
+   - Selecciona la opción "IATA" del selector.
+   - Introduce el código IATA de la ciudad.
+   - Verifica las llamadas a la API basadas en la ciudad decodificada del código IATA y muestra los resultados.
 
 ---
 
