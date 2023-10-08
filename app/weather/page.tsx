@@ -38,7 +38,7 @@ export default function Home() {
   const { data: airportsData } = useQuery(
     "airports",
     async () => {
-      const response = await fetch("/airports.json");
+      const response = await fetch("/data/airports.json");
       return response.json();
     },
     { staleTime: Infinity }
@@ -47,7 +47,7 @@ export default function Home() {
   const { data: cityNamesData = [] } = useQuery(
     "cityNames",
     async () => {
-      const response = await fetch("/sorted_city_names.json");
+      const response = await fetch("/data/sorted_city_names.json");
       return response.json();
     },
     { staleTime: Infinity }
@@ -56,7 +56,7 @@ export default function Home() {
   const { data: iataCodesData = [] } = useQuery(
     "iataCodes",
     async () => {
-      const response = await fetch("/iata_codes.json");
+      const response = await fetch("/data/iata_codes.json");
       return response.json();
     },
     { staleTime: Infinity }
