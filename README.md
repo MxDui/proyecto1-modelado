@@ -127,7 +127,8 @@ La aplicación debería estar corriendo en [http://localhost:3000](http://localh
 
 La estructura del proyecto debe ser clara e intuitiva, pensando en un mantenimiento posterior a la entrega.
 
-- En el folder `app` se encuentran los archivos de la aplicación, mientras que en el folder `cypress` se encuentran los archivos de las pruebas.
+- En el folder `app` se encuentran los archivos de la aplicación, mientras que en el folder `cypress` se encuentran los archivos de las pruebas y en el folder `public` se encuentran los archivos públicos de la aplicación.
+
 - Dentro de `app` se encuentran los siguientes folders:
   `components`: contiene los componentes de la aplicación.
   `services`: contiene los servicios de la aplicación.
@@ -136,6 +137,8 @@ La estructura del proyecto debe ser clara e intuitiva, pensando en un mantenimie
   `integration`: contiene las pruebas de integración.
   `support`: contiene los archivos de configuración de Cypress.
   `e2e`: contiene las pruebas de extremo a extremo.
+- Dentro de `public` se encuentran los siguientes folders que contienen los archivos públicos de la aplicación ( esto ya que Next.js lo requiere así de acuerdo a su documentación):
+  `data`: contiene los archivos de datos públicos de la aplicación.
 
 ---
 
