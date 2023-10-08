@@ -137,6 +137,8 @@ La estructura del proyecto debe ser clara e intuitiva, pensando en un mantenimie
   `support`: contiene los archivos de configuración de Cypress.
   `e2e`: contiene las pruebas de extremo a extremo.
 
+- En el folder `public` se encuentran los archivos públicos de la aplicación y es este folder ya que así lo establece Next.js dentro de su documentación.
+
 ---
 
 ## 5. Pruebas
