@@ -11,27 +11,21 @@ describe("Weather Page", () => {
     cy.get("select").select("cities");
 
     // Type in the departure and arrival cities
-    cy.get('input[placeholder="Ciudad de Salida"]').type("London");
-    cy.get('input[placeholder="Ciudad de Llegada"]').type("Paris");
+    cy.get('input[placeholder="Ciudad"]').type("London");
 
     // Mock the API response for the cities
     cy.intercept(
       "https://api.openweathermap.org/data/2.5/weather?q=London&appid=*"
     ).as("getLondonWeather");
-    cy.intercept(
-      "https://api.openweathermap.org/data/2.5/weather?q=Paris&appid=*"
-    ).as("getParisWeather");
 
     // Click on the "Buscar" button
     cy.get("button").contains("Buscar").click();
 
     // Verify the API calls were made and check the results
     cy.wait("@getLondonWeather");
-    cy.wait("@getParisWeather");
 
     cy.get("div").contains("Resultados").should("be.visible");
     cy.get("div").contains("LONDON").should("be.visible");
-    cy.get("div").contains("PARIS").should("be.visible");
   });
   it("should search by boleto using random tickets from fixture", () => {
     // Set up the general intercepts for weather endpoints
@@ -85,5 +79,31 @@ describe("Weather Page", () => {
         });
       });
     });
+  });
+  it("should search by IATA code", () => {
+    // Set up the general intercepts for weather endpoints
+    cy.intercept("GET", "https://api.openweathermap.org/data/2.5/weather*").as(
+      "getWeather"
+    );
+
+    // Select the "IATA" option
+    cy.get("select").select("iata");
+
+    // Type in the IATA code
+    cy.get('input[placeholder="IATA"]').type("LHR");
+
+    // Mock the API response for the IATA code's weather
+    cy.intercept("https://api.openweathermap.org/data/2.5/weather?lat=*").as(
+      "getIATAWeather"
+    );
+
+    // Click on the "Buscar" button
+    cy.get("button").contains("Buscar").click();
+
+    // Verify the API call was made and check the results
+    cy.wait("@getIATAWeather");
+
+    cy.get("div").contains("Resultados").should("be.visible");
+    cy.get("div").contains("LHR").should("be.visible");
   });
 });

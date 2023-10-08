@@ -9,38 +9,7 @@ import {
 import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
-
-type WeatherData = {
-  temperature: number;
-  status: string;
-  pressure: number;
-  humidity: number;
-  sea_level: number;
-  grnd_level: number;
-  icon: string;
-};
-
-type BoletoDecoded = {
-  departureCoords: Coordinates;
-  arrivalCoords: Coordinates;
-  departureCity: string;
-  arrivalCity: string;
-};
-
-type Coordinates = {
-  lat: number;
-  lon: number;
-};
-
-type Ticket = {
-  num_ticket: string;
-  origin: string;
-  destination: string;
-  origin_latitude: number;
-  origin_longitude: number;
-  destination_latitude: number;
-  destination_longitude: number;
-};
+import { Coordinates, Ticket, BoletoDecoded, WeatherData } from "../types";
 
 export default function Home() {
   const [searchMode, setSearchMode] = React.useState<string>("cities");
@@ -62,6 +31,9 @@ export default function Home() {
     string[]
   >([]);
   const [iataCode, setIataCode] = React.useState<string>("");
+  const [iataSuggestions, setIataSuggestions] = React.useState<string[]>([]);
+  const [showIataSuggestions, setShowIataSuggestions] =
+    React.useState<boolean>(false);
 
   const { data: airportsData } = useQuery(
     "airports",
@@ -255,6 +227,21 @@ export default function Home() {
     setArrivalCitySuggestions(suggestions);
   }, [arrivalCity, cityNamesData]);
 
+  React.useEffect(() => {
+    if (iataCode.length > 1) {
+      // Show suggestions after 2 characters
+      const suggestions = iataCodesData
+        .filter((codeInfo: any) =>
+          codeInfo.iata_code.startsWith(iataCode.toUpperCase())
+        )
+        .map((codeInfo: any) => codeInfo.iata_code)
+        .slice(0, 5); // Limit suggestions to top 5 matches
+      setIataSuggestions(suggestions);
+    } else {
+      setIataSuggestions([]);
+    }
+  }, [iataCode, iataCodesData]);
+
   const handleSearch = async () => {
     if (searchMode === "boleto") {
       try {
@@ -347,15 +334,43 @@ export default function Home() {
           </div>
         ) : searchMode === "iata" ? (
           <div className="w-full grid grid-cols-2 gap-4 my-5">
-            <input
-              className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
-              placeholder="IATA"
-              value={iataCode}
-              onChange={(e) => setIataCode(e.target.value)}
-            />
+            <div className="flex flex-col relative">
+              <input
+                className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
+                placeholder="IATA"
+                value={iataCode}
+                onFocus={() => setShowIataSuggestions(true)}
+                onChange={(e) => setIataCode(e.target.value)}
+              />
+              {iataCode && showIataSuggestions && (
+                <div className="absolute top-full w-full z-10 mt-2 bg-white shadow-md">
+                  {iataSuggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200 cursor-pointer"
+                      onClick={() => {
+                        setIataCode(suggestion);
+                        setShowIataSuggestions(false);
+                      }}
+                    >
+                      {suggestion}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               className="bg-button text-button-text px-6 py-2 rounded w-full hover:bg-yellow-500 transition-all duration-200"
-              onClick={handleSearch}
+              onClick={() => {
+                if (
+                  !iataSuggestions.includes(iataCode) &&
+                  iataSuggestions.length > 0
+                ) {
+                  setIataCode(iataSuggestions[0]);
+                }
+                handleSearch();
+                setShowIataSuggestions(false);
+              }}
             >
               Buscar
             </button>
