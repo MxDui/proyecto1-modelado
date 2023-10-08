@@ -9,7 +9,6 @@ import {
 import { InputComponent } from "../components/weather/Input";
 import { ResultComponent } from "../components/weather/Results";
 import Weather from "../services/Weather";
-import { BoletoDecoded, Coordinates, Ticket } from "../types";
 
 type WeatherData = {
   temperature: number;
@@ -21,11 +20,32 @@ type WeatherData = {
   icon: string;
 };
 
+type BoletoDecoded = {
+  departureCoords: Coordinates;
+  arrivalCoords: Coordinates;
+  departureCity: string;
+  arrivalCity: string;
+};
+
+type Coordinates = {
+  lat: number;
+  lon: number;
+};
+
+type Ticket = {
+  num_ticket: string;
+  origin: string;
+  destination: string;
+  origin_latitude: number;
+  origin_longitude: number;
+  destination_latitude: number;
+  destination_longitude: number;
+};
+
 export default function Home() {
   const [searchMode, setSearchMode] = React.useState<string>("cities");
   const [boleto, setBoleto] = React.useState<string>("");
   const [alertMessage, setAlertMessage] = React.useState<string | null>(null);
-
   const [searchedDepartureCity, setSearchedDepartureCity] =
     React.useState<string>("");
   const [searchedArrivalCity, setSearchedArrivalCity] =
@@ -34,15 +54,14 @@ export default function Home() {
     React.useState<Coordinates | null>(null);
   const [searchedArrivalCoords, setSearchedArrivalCoords] =
     React.useState<Coordinates | null>(null);
-
   const [departureCity, setDepartureCity] = React.useState<string>("");
   const [arrivalCity, setArrivalCity] = React.useState<string>("");
-
   const [departureCitySuggestions, setDepartureCitySuggestions] =
     React.useState<string[]>([]);
   const [arrivalCitySuggestions, setArrivalCitySuggestions] = React.useState<
     string[]
   >([]);
+  const [iataCode, setIataCode] = React.useState<string>("");
 
   const { data: airportsData } = useQuery(
     "airports",
@@ -57,6 +76,15 @@ export default function Home() {
     "cityNames",
     async () => {
       const response = await fetch("/sorted_city_names.json");
+      return response.json();
+    },
+    { staleTime: Infinity }
+  );
+
+  const { data: iataCodesData = [] } = useQuery(
+    "iataCodes",
+    async () => {
+      const response = await fetch("/iata_codes.json");
       return response.json();
     },
     { staleTime: Infinity }
@@ -174,12 +202,15 @@ export default function Home() {
       "weather",
       searchMode === "boleto" ? searchedDepartureCoords : searchedDepartureCity,
     ],
-    () =>
-      searchMode === "boleto"
-        ? fetchWeatherByCoords(searchedDepartureCoords as Coordinates)
-        : fetchWeather(searchedDepartureCity),
+    () => {
+      if (searchMode === "boleto" || searchMode === "iata") {
+        return fetchWeatherByCoords(searchedDepartureCoords as Coordinates);
+      }
+      return fetchWeather(searchedDepartureCity);
+    },
     { enabled: !!searchedDepartureCity || !!searchedDepartureCoords }
   );
+
   const arrivalWeatherQuery: UseQueryResult<WeatherData, Error> = useQuery(
     [
       "weather",
@@ -235,6 +266,17 @@ export default function Home() {
       } catch (error) {
         console.log(error);
       }
+    } else if (searchMode === "iata") {
+      const iataInfo = iataCodesData.find(
+        (codeInfo: any) => codeInfo.iata_code === iataCode
+      );
+      if (iataInfo) {
+        setSearchedDepartureCoords({
+          lat: iataInfo.latitude_deg,
+          lon: iataInfo.longitude_deg,
+        });
+        setSearchedDepartureCity(iataCode);
+      }
     } else {
       setSearchedDepartureCity(departureCity);
     }
@@ -277,6 +319,7 @@ export default function Home() {
             setBoleto("");
             setDepartureCity("");
             setArrivalCity("");
+            setIataCode("");
             setSearchedDepartureCity("");
             setSearchedArrivalCity("");
             setSearchedDepartureCoords(null);
@@ -285,6 +328,7 @@ export default function Home() {
         >
           <option value="boleto">Boleto</option>
           <option value="cities">Ciudades</option>
+          <option value="iata">IATA</option>
         </select>
         {searchMode === "boleto" ? (
           <div className="w-full grid grid-cols-2 gap-4 my-5">
@@ -293,6 +337,21 @@ export default function Home() {
               placeholder="Código de Boleto"
               value={boleto}
               onChange={(e) => setBoleto(e.target.value)}
+            />
+            <button
+              className="bg-button text-button-text px-6 py-2 rounded w-full hover:bg-yellow-500 transition-all duration-200"
+              onClick={handleSearch}
+            >
+              Buscar
+            </button>
+          </div>
+        ) : searchMode === "iata" ? (
+          <div className="w-full grid grid-cols-2 gap-4 my-5">
+            <input
+              className="border p-2 rounded w-full text-paragraph border-475d5b hover:border-headline focus:border-headline focus:outline-none transition-all duration-200"
+              placeholder="IATA"
+              value={iataCode}
+              onChange={(e) => setIataCode(e.target.value)}
             />
             <button
               className="bg-button text-button-text px-6 py-2 rounded w-full hover:bg-yellow-500 transition-all duration-200"
